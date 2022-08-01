@@ -1,0 +1,3 @@
+[submodule "Modules/itgpowershellwrapper"]
+	path = Modules/itgpowershellwrapper
+	url = https://github.com/yellowboxsolutions/itgpowershellwrapper

@@ -11,12 +11,44 @@
 
 # Authenticate with Azure PowerShell using MSI.
 # Remove this if you are not planning on using MSI or Azure PowerShell.
-if ($env:MSI_SECRET) {
-    Disable-AzContextAutosave -Scope Process | Out-Null
-    Connect-AzAccount -Identity
-}
+# if ($env:MSI_SECRET) {
+    # Disable-AzContextAutosave -Scope Process | Out-Null
+    # Connect-AzAccount -Identity
+# }
 
 # Uncomment the next line to enable legacy AzureRm alias in Azure PowerShell.
 # Enable-AzureRmAlias
 
 # You can also define functions or aliases that can be referenced in any of your PowerShell functions.
+
+# import-module '.\Modules\ITGlueAPI\ITGlueAPI'
+
+function Get-AccessToken {
+    param (
+        [Parameter()]
+        [ValidateSet('Graph')]
+        [string]
+        $TokenType = 'Graph',
+
+        [Parameter()]
+        [string]
+        $TenantId
+    )
+
+    if ($TokenType -eq 'Graph') {
+        $RequestBody = @{
+                client_id     = $ApplicationId
+                client_secret = $ApplicationSecret
+                scope         = 'https://graph.microsoft.com/.default'
+                refresh_token = $RefreshToken
+                grant_type    = 'refresh_token'
+        }
+    }
+    
+    if (!$TenantId) {$TenantId = $ENV:SAMTenantId}
+    
+    $ResponseBody = Invoke-RestMethod -Method post -Uri "https://login.microsoftonline.com/$($tenantid)/oauth2/v2.0/token" -Body $RequestBody -ErrorAction Stop
+
+    $ResponseBody.access_token
+    
+}
