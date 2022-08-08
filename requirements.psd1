@@ -7,5 +7,5 @@
     # 'Az' = '8.*'
     'AutotaskAPI' = '1.*'
     # 'ITGlueAPI' = '2.1.1'
-    'Microsoft.Graph' = '1.*'
+    # 'Microsoft.Graph' = '1.*'
 }

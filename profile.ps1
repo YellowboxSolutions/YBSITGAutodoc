@@ -23,6 +23,8 @@
 
 # import-module '.\Modules\ITGlueAPI\ITGlueAPI'
 
+$DefaultBaseUri = 'https://graph.microsoft.com/v1.0'
+
 function Get-AccessToken {
     param (
         [Parameter()]
@@ -51,4 +53,34 @@ function Get-AccessToken {
 
     $ResponseBody.access_token
     
+}
+
+function Invoke-MGRequest  {
+    [CmdletBinding()]
+    param (
+        # Access Token
+        [string]
+        $AccessToken,
+
+        # Resource
+        [Parameter(Mandatory)]
+        [string]
+        $Resource
+    )
+    
+    begin {
+        $headers = @{
+            'Authorization' = "bearer $($AccessToken)"
+            'Content-type' = "application/json"
+        }
+    }
+    
+    process {
+        $response = Invoke-RestMethod -method get -uri "https://graph.microsoft.com/v1.0/$($Resource)" -Headers $headers
+        $response.value
+    }
+    
+    end {
+        $headers = $null
+    }
 }
