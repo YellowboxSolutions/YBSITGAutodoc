@@ -22,7 +22,6 @@
 # You can also define functions or aliases that can be referenced in any of your PowerShell functions.
 
 # import-module '.\Modules\ITGlueAPI\ITGlueAPI'
-
 $DefaultBaseUri = 'https://graph.microsoft.com/v1.0'
 
 function Get-AccessToken {
@@ -65,7 +64,11 @@ function Invoke-MGRequest  {
         # Resource
         [Parameter(Mandatory)]
         [string]
-        $Resource
+        $Resource,
+
+        # Select fields
+        [String[]]
+        $Select
     )
     
     begin {
@@ -76,7 +79,12 @@ function Invoke-MGRequest  {
     }
     
     process {
-        $response = Invoke-RestMethod -method get -uri "https://graph.microsoft.com/v1.0/$($Resource)" -Headers $headers
+        $uri = "$DefaultBaseUri/$($Resource)"
+        if ($Select) {
+            $Select = $Select -join ","
+            $uri = "$($uri)?`$select=$($Select)"
+        }
+        $response = Invoke-RestMethod -method get -uri $uri -Headers $headers
         $response.value
     }
     

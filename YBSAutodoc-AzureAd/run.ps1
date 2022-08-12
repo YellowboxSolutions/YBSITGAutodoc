@@ -19,6 +19,7 @@ $APIEndpoint = $ENV:ITGEndpoint
 $FlexAssetName = "Azure AD - AutoDoc v2"
 $Description = "A network one-page document that shows the Azure AD settings."
 
+Set-Variable -Name "ITGlue_JSON_Conversion_Depth" -Value 100 -Scope global -Force
 Add-ITGlueBaseURI -base_uri $APIEndpoint
 Add-ITGlueAPIKey $APIKEy
 ########################## /IT-Glue ############################
@@ -142,26 +143,26 @@ foreach ($ATContract in $ATContracts) {
     $CustomerGraphToken = Get-AccessToken -TenantId $ATContract.TenantId
 
 
-    $AzureADPrimaryDomain = $null
-    $AzureADHTMLDomains = $null
+    $AzureADPrimaryDomain = ''
+    $AzureADHTMLDomains = ''
     $AzureADDomains = Invoke-MGRequest -AccessToken $CustomerGraphToken -Resource domains
     $AzureADPrimaryDomain = ($AzureADDomains | Where-Object { $_.IsDefault -eq $true }).Id
     $AzureADHTMLDomains = $AzureADDomains | Select-Object Id, IsDefault, IsInitial, Isverified | ConvertTo-Html -Fragment | Out-String
     $AzureADHTMLDomains = $TableHeader + ($AzureADHTMLDomains -replace $TableStyling) + $Whitespace
     Write-Verbose $AzureADHTMLDomains
 
-    $AzureADNormalUsers = $null
-    $AzureADUsers = Invoke-MGRequest -AccessToken $CustomerGraphToken -Resource users
+    $AzureADNormalUsers = ''
+    $AzureADUsers = Invoke-MGRequest -AccessToken $CustomerGraphToken -Resource users -Select DisplayName, Mail, ProxyAddresses,UserType
     $AzureADNormalUsers = $AzureADUsers | Where-Object { $_.UserType -eq "Member" } | Select-Object DisplayName, Mail, @{N='ProxyAddresses';E={$_.proxyaddresses|out-string}} | ConvertTo-Html -Fragment | Out-String
     $AzureADNormalUsers = $TableHeader + ($AzureADNormalUsers -replace $TableStyling) + $Whitespace
     Write-Verbose $AzureADNormalUsers
     
-    $AzureADGuestUsers = $null
+    $AzureADGuestUsers = ''
     $AzureADGuestUsers = $AzureADUsers | Where-Object { $_.UserType -ne "Member" } | Select-Object DisplayName, Mail | ConvertTo-Html -Fragment | Out-String
     $AzureADGuestUsers =  $TableHeader + ($AzureADGuestUsers -replace $TableStyling) + $Whitespace
     Write-Verbose $AzureADGuestUsers
 
-    $AzureADAdminUsers = $null
+    $AzureADAdminUsers = ''
     # $AdminRole = Invoke-MGRequest -AccessToken $CustomerGraphToken -Resource DirectoryRoles
     # if ($AdminRole) {
         # $AzureADAdminUsers = $AdminRole|Get-MgDirectoryRoleMember
